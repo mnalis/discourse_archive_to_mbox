@@ -85,8 +85,11 @@ while ($row = $csv->getline_hr($fh)) {
     my $subject = $row->{'topic_title'} // '(no subject)';
     my $body    = $row->{'post_raw'}    // '(no body)';  #FIXME: also 'post_cooked' for text/html in multipart-alternative?
     my $created = $row->{'created_at'}  // '';
+    my $is_pm   = $row->{'is_pm'}       // 'No';
     my $url     = $row->{'url'};
     
+    $subject = '[PM] ' . $subject if $is_pm eq 'Yes'; # mark "private messages" as Discourse does (in other direction)
+
     if ($replace_domain && defined $url) {
         if ($url =~ m{^https?://([^/]+)/}) { $domain = $1 }
     }
