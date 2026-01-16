@@ -5,9 +5,11 @@ It was written to solve https://meta.discourse.org/t/export-own-messages-to-mbox
 
 ## Usage:
 
-* unzip your `user_archive-USERNAME-*.zip` to a directory
+* unzip your `user_archive-USERNAME-*.zip` to some directory
 * run `discourse_csv_to_mbox.pl > output.mbox`
+* if you want to overrider From field, use `DISCOURSE_FROM="Some user" discourse_csv_to_mbox.pl > output.mbox`
+  or even `DISCOURSE_FROM="Some user <their_email@example.com>" discourse_csv_to_mbox.pl > output.mbox`
 
 ## TODO
-* allow user to specify "From" (or even auto-pick from JSON)
-* implement `post_cooked` for multipart-alternative text/html
+* try to auto-detect "From:" from `preferences.json` ?
+* implement `post_cooked` for multipart-alternative text/html ?

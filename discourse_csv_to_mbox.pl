@@ -16,17 +16,20 @@ use autodie qw(:all);
 use feature 'say';
 
 my $csv_file = 'user_archive.csv';
+my $ADD_REF = $ENV{'ADD_REF'} // 1;
+my $DISCOURSE_FROM = $ENV{'DISCOURSE_FROM'} // '';
 
 my $user = 'discourse';
 my $domain = 'discourse.invalid';
+my $emaildesc = undef;
 my $replace_domain = 1;
-my $ADD_REF = $ENV{'ADD_REF'} // 1;
+
 
 #
 # no user serviceable parts below
 #
 
-my $VERSION = "discourse_csv_to_mbox.pl v0.9";
+my $VERSION = "discourse_csv_to_mbox.pl v0.91";
 
 my $row;
 my %references = ();
@@ -69,6 +72,16 @@ sub add_references($$) {
 binmode(STDOUT, ":encoding(UTF-8)");
 binmode(STDERR, ":encoding(UTF-8)");
 
+if ($DISCOURSE_FROM =~ m{^\s*(.+)\s+<(.+)@(.+)>\s*$}) {
+    # if e-mail is also specified inside <>, override one autodetected from archive.
+    $emaildesc = $1;
+    $user = $2;
+    $domain = $3;
+    $replace_domain = 0;
+} else {
+    # otherwise, keep autodetected e-mail and only change display-friendly "From"
+    $emaildesc = $DISCOURSE_FROM;
+}
 
 my $csv = Text::CSV->new({
     binary      => 1,
@@ -96,6 +109,7 @@ while ($row = $csv->getline_hr($fh)) {
         if ($url =~ m{^https?://([^/]+)/}) { $domain = $1 }
     }
 
+    my $from = "$user\@$domain";
     my $epoch = str2time($created) || time;
     my $date  = strftime("%a %b %d %H:%M:%S %Y", gmtime($epoch));
 #    my $msgid = join('.', ($epoch, time, $$, rand(1000), $url)) . '@' . $domain;   # use undermenistic random ID
@@ -105,7 +119,7 @@ while ($row = $csv->getline_hr($fh)) {
     $body =~ s/^From /">From "/mg;  # escape any "From " lines if present, to avoid breaking MBOX format
 
     say "From $user\@$domain $date";
-    say "From: $user\@$domain";
+    say "From: $emaildesc <$from>";
     say "Subject: $subject";
     say "Date: $date +0000";
     say "Message-ID: <$msgid>";
