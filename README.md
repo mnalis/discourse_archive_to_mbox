@@ -3,7 +3,7 @@ Converts to Discourse user_archive.csv to Mailbox file
 
 ## Usage:
 
-* unzip your user_archive-USERNAME-*.zip to a directory
+* unzip your `user_archive-USERNAME-*.zip` to a directory
 * run `discourse_csv_to_mbox.pl > output.mbox`
 
 ## TODO
