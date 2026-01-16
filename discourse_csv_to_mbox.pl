@@ -3,6 +3,7 @@
 #
 # converts Discourse "user_archive.csv" from user_archive*.zip data export ZIP file to MBOX format to be read in MUAs
 #
+# requires Text:CSV module (use "apt-get install libtext-csv-perl" on Debian)
 
 use strict;
 use warnings;
