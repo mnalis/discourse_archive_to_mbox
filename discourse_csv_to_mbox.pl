@@ -26,6 +26,8 @@ my $ADD_REF = $ENV{'ADD_REF'} // 1;
 # no user serviceable parts below
 #
 
+my $VERSION = "discourse_csv_to_mbox.pl v0.9";
+
 my $row;
 my %references = ();
 
@@ -108,6 +110,7 @@ while ($row = $csv->getline_hr($fh)) {
     say "Date: $date +0000";
     say "Message-ID: <$msgid>";
 
+    say "X-Converter: Converted from Discourse $csv_file by $VERSION";
     add_opt_header('url');
     add_references($url, $msgid) if $ADD_REF;
     add_opt_header('categories');
