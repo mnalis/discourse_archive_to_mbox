@@ -20,12 +20,14 @@ my $csv_file = 'user_archive.csv';
 my $user = 'discourse';
 my $domain = 'discourse.invalid';
 my $replace_domain = 1;
+my $ADD_REF = $ENV{'ADD_REF'} // 1;
 
 #
 # no user serviceable parts below
 #
 
 my $row;
+my %references = ();
 
 # record optional header, if present
 sub add_opt_header($) {
@@ -33,6 +35,27 @@ sub add_opt_header($) {
     my $v = $row->{$h};
     
     say "X-Discourse-$h: $v" if defined $v;
+}
+
+# attempt to use heuristics to add references for e-mail threads
+sub add_references($$) {
+    my $url = shift;    # in format: https://community.openstreetmap.org/t/greetings/214/3
+    my $msgid = shift;
+
+    return if !defined $url or !defined $msgid;
+
+    #my ($proto, $fqdn, $thread, $msg) = ($url =~ m{^(https?)://([^/]+)/(.+)/(\d+)$});
+    #say STDERR "DBG: proto=$proto; fqdn=$fqdn; thread=$thread, $msg=$msg";
+
+    my ($thread, $msg) = ($url =~ m{^(https?://.+)/(\d+)$});
+    #say STDERR "DBG: thread=$thread, $msg=$msg";
+    push @{$references{$thread}}, "<$msgid>";
+
+    if (scalar @{$references{$thread}} > 10) {  # the list of references is getting too large, trim it
+        splice(@{$references{$thread}}, 1, 1);   # keep 1st and all other elements except 2nd
+    }
+
+    say "References: " . join ("\n ",  @{$references{$thread}});
 }
 
 #
@@ -83,6 +106,7 @@ while ($row = $csv->getline_hr($fh)) {
     say "Message-ID: <$msgid>";
 
     add_opt_header('url');
+    add_references($url, $msgid) if $ADD_REF;
     add_opt_header('categories');
     add_opt_header('is_pm');
     add_opt_header('like_count');
