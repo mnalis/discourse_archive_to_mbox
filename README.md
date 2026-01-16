@@ -9,3 +9,4 @@ Converts to Discourse user_archive.csv to Mailbox file
 ## TODO
 * allow user to specify "From" (or even auto-pick from JSON)
 * try to implement pseudo-threading
+* implement `post_cooked` for multipart-alternative text/html
