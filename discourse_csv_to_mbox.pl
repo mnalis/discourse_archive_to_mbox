@@ -29,7 +29,7 @@ my $replace_domain = 1;
 # no user serviceable parts below
 #
 
-my $VERSION = "discourse_csv_to_mbox.pl v0.91";
+my $VERSION = "discourse_csv_to_mbox.pl v0.92";
 
 my $row;
 my %references = ();
@@ -100,10 +100,16 @@ while ($row = $csv->getline_hr($fh)) {
     my $subject = $row->{'topic_title'} // '(no subject)';
     my $body    = $row->{'post_raw'}    // '(no body)';  #FIXME: also 'post_cooked' for text/html in multipart-alternative?
     my $created = $row->{'created_at'}  // '';
+    my $cat     = $row->{'categories'}  // '';
     my $is_pm   = $row->{'is_pm'}       // 'No';
     my $url     = $row->{'url'};
     
-    $subject = '[PM] ' . $subject if $is_pm eq 'Yes'; # mark "private messages" as Discourse does (in other direction)
+    my $subj_prefix = '';
+    $subj_prefix = '[PM] ' if $is_pm eq 'Yes'; # mark "private messages" as Discourse does (in other direction)
+    if ($cat and $cat ne '-') {
+        $cat =~ tr,|,/,;
+        $subj_prefix .= "[$cat] "
+    }
 
     if ($replace_domain && defined $url) {
         if ($url =~ m{^https?://([^/]+)/}) { $domain = $1 }
@@ -120,7 +126,7 @@ while ($row = $csv->getline_hr($fh)) {
 
     say "From $user\@$domain $date";
     say "From: $emaildesc <$from>";
-    say "Subject: $subject";
+    say "Subject: ${subj_prefix}$subject";
     say "Date: $date +0000";
     say "Message-ID: <$msgid>";
 
