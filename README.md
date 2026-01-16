@@ -16,3 +16,6 @@ See https://meta.discourse.org/t/export-own-messages-to-mbox-format/374643
 ## TODO
 * try to auto-detect "From:" from `preferences.json` ?
 * implement `post_cooked` for multipart-alternative text/html ?
+* implement better threading, but archive seems to miss post-ID as in:
+  Message-ID: <discourse/post/1192582@community.openstreetmap.org>
+  so that would need to be feature-requested first from Discourse

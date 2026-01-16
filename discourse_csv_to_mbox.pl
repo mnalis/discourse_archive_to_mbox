@@ -29,7 +29,7 @@ my $replace_domain = 1;
 # no user serviceable parts below
 #
 
-my $VERSION = "discourse_csv_to_mbox.pl v0.92";
+my $VERSION = "discourse_csv_to_mbox.pl v0.93";
 
 my $row;
 my %references = ();
@@ -49,18 +49,20 @@ sub add_references($$) {
 
     return if !defined $url or !defined $msgid;
 
-    #my ($proto, $fqdn, $thread, $msg) = ($url =~ m{^(https?)://([^/]+)/(.+)/(\d+)$});
-    #say STDERR "DBG: proto=$proto; fqdn=$fqdn; thread=$thread, $msg=$msg";
-
     my ($thread, $msg) = ($url =~ m{^(https?://.+)/(\d+)$});
     #say STDERR "DBG: thread=$thread, $msg=$msg";
-    push @{$references{$thread}}, "<$msgid>";
 
-    if (scalar @{$references{$thread}} > 10) {  # the list of references is getting too large, trim it
-        splice(@{$references{$thread}}, 1, 1);   # keep 1st and all other elements except 2nd
+    if (!defined($references{$thread})) {
+        @{$references{$thread}} = ();            # create empty list of references if this is a first message in the thread
     }
 
-    say "References: " . join ("\n ",  @{$references{$thread}});
+    say "References: " . join ("\n ",  @{$references{$thread}}) if @{$references{$thread}};
+
+    push @{$references{$thread}}, "<$msgid>";
+
+    if (scalar @{$references{$thread}} > 10) {   # the list of references is getting too large, trim it
+        splice(@{$references{$thread}}, 1, 1);   # keep 1st and all other elements except 2nd
+    }
 }
 
 #
